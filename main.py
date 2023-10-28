@@ -3,7 +3,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from io import BytesIO
-import os
 from fastapi.middleware.cors import CORSMiddleware
 from qiskit_ionq import IonQProvider
 from decouple import config
