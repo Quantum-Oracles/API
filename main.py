@@ -1,5 +1,5 @@
 from qiskit import *
-from fastapi import FastAPI 
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from io import BytesIO
@@ -37,22 +37,28 @@ class Circuit(BaseModel):
 
 @app.post("/circuit")
 async def create_circuit(circuit: Circuit, backend_name: str | None = "ibmq_qasm_simulator"):
-    circuit = QuantumCircuit.from_qasm_str(circuit.qasm)
-    provider = get_provider(backend_name)
-    backend = provider.get_backend(backend_name)
-    transpiled = transpile(circuit, backend=backend)
-    job = backend.run(transpiled)
-    return job.job_id()
+    try:
+      circuit = QuantumCircuit.from_qasm_str(circuit.qasm)
+      provider = get_provider(backend_name)
+      backend = provider.get_backend(backend_name)
+      transpiled = transpile(circuit, backend=backend)
+      job = backend.run(transpiled)
+      return job.job_id()
+    except:
+      raise HTTPException(400, "Invalid Circuit")
 
 @app.post("/draw")
 async def create_circuit(circuit: Circuit):
-    circuit = QuantumCircuit.from_qasm_str(circuit.qasm)
-    drawn_image = circuit.draw(output="mpl")
-    buffer = BytesIO()
-    drawn_image.savefig(buffer, format="png")
-    buffer.seek(0)
+    try:
+      circuit = QuantumCircuit.from_qasm_str(circuit.qasm)
+      drawn_image = circuit.draw(output="mpl")
+      buffer = BytesIO()
+      drawn_image.savefig(buffer, format="png")
+      buffer.seek(0)
 
-    return StreamingResponse(buffer, media_type="image/png")
+      return StreamingResponse(buffer, media_type="image/png")
+    except:
+      raise HTTPException(400, "Invalid Circuit")
 
 @app.post("/result/{job_id}")
 def get_result(job_id: str, backend_name: str | None = "ibmq_qasm_simulator"):
