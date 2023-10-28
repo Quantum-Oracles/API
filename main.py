@@ -7,6 +7,7 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from qiskit_ionq import IonQProvider
 from decouple import config
+from azure.quantum.qiskit import AzureQuantumProvider
 
 app = FastAPI()
 
@@ -23,13 +24,17 @@ app.add_middleware(
 )
 
 def get_provider(backend_name):
-    if backend_name == "ibmq_qasm_simulator":
+    if backend_name == "ionq_simulator":
+        api_key = config("IONQ_API_KEY")
+        provider = IonQProvider(api_key)
+    elif backend_name == "quantinuum.sim.h1-2sc":
+        resource_id = config("AZURE_RESOURCE_ID")
+        location = config("AZURE_LOCATION")
+        provider = AzureQuantumProvider(resource_id=resource_id,location=location)
+    else:
         api_key = config("IBM_API_KEY")
         IBMQ.save_account(api_key)
         provider = IBMQ.load_account()
-    elif backend_name == "ionq_simulator":
-        api_key = config("IONQ_API_KEY")
-        provider = IonQProvider(api_key)
     return provider
 
 class Circuit(BaseModel):
