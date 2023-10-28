@@ -36,9 +36,6 @@ def get_provider(backend_name):
         provider = IBMQ.load_account()
     return provider
 
-class Circuit(BaseModel):
-    qasm: str
-
 @app.post("/circuit")
 async def create_circuit(qasm: str = Body(), backend_name: str | None = Body("ibmq_qasm_simulator")):
     try:
