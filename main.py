@@ -43,12 +43,12 @@ async def create_circuit(circuit: Circuit, backend_name: str | None = "ibmq_qasm
       backend = provider.get_backend(backend_name)
       transpiled = transpile(circuit, backend=backend)
       job = backend.run(transpiled)
-      return job.job_id()
+      return {"jobId": job.job_id()}
     except:
       raise HTTPException(400, "Invalid Circuit")
 
 @app.post("/draw")
-async def create_circuit(circuit: Circuit):
+async def draw_circuit(circuit: Circuit):
     try:
       circuit = QuantumCircuit.from_qasm_str(circuit.qasm)
       drawn_image = circuit.draw(output="mpl")
