@@ -1,5 +1,5 @@
 from qiskit import *
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from io import BytesIO
@@ -49,9 +49,11 @@ async def create_circuit(qasm: str = Body(), backend_name: str | None = Body("ib
       raise HTTPException(400, "Invalid Circuit")
 
 @app.post("/draw")
-async def draw_circuit(qasm: str = Body()):
+async def draw_circuit(qasm: str = Form()):
     try:
+      print(qasm)
       circuit = QuantumCircuit.from_qasm_str(qasm)
+      print(circuit)
       drawn_image = circuit.draw(output="mpl")
       buffer = BytesIO()
       drawn_image.savefig(buffer, format="png")
